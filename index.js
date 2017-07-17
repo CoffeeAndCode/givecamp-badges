@@ -1,4 +1,6 @@
+const chunk = require('lodash.chunk');
 const fs = require('fs');
+const parse = require('csv-parse/lib/sync');
 const PDFDocument = require('pdfkit');
 
 const pdfDPI = 72;
@@ -17,18 +19,14 @@ const barHeight = 30;
 const extraPageHorizontalMargin = (paperWidth - (badgeWidth * badgesPerRow)) * pdfDPI / 2;
 const extraPageVerticalMargin = (paperHeight - (badgeHeight * badgeRowsPerPage)) * pdfDPI / 2;
 
-const doc = new PDFDocument();
+const doc = new PDFDocument({ autoFirstPage: false });
 doc.pipe(fs.createWriteStream('badges.pdf'));
 
-for (let i = 0; i < badgeRowsPerPage; i++) {
-  const badgeY = extraPageVerticalMargin + (i * badgeHeight * pdfDPI);
+const attendeesByPage = chunk(parse(fs.readFileSync('data.csv', 'utf8'), { columns: true }), badgeRowsPerPage * badgesPerRow);
 
-  doc.rect(extraPageHorizontalMargin, badgeY + (badgeHeight * pdfDPI) - barHeight, pdfWidth - (extraPageHorizontalMargin * 2), barHeight)
-    .fill('#6fb055');
-
-  renderBadge(extraPageHorizontalMargin, badgeY);
-  renderBadge(extraPageHorizontalMargin + (badgeWidth * pdfDPI), badgeY);
-}
+attendeesByPage.forEach((attendees) => {
+  renderPage(attendees);
+});
 
 doc.end();
 
@@ -38,18 +36,20 @@ function fontSizeForString(string) {
   return 25;
 }
 
-function renderBadge(x, y) {
+function renderBadge(x, y, attendee) {
+  if (!attendee) { return; }
+
   doc.fillColor('black')
-    .fontSize(fontSizeForString('Sankareshw'))
-    .text('Sankareshwari', x + 10, y + 35, {
+    .fontSize(fontSizeForString(attendee['First Name']))
+    .text(attendee['First Name'], x + 10, y + 35, {
       align: 'left',
       ellipsis: true,
       height: 10,
       indent: 0,
       width: (badgeWidth * pdfDPI) - 20,
     })
-    .fontSize(fontSizeForString('Shewinvanakitkul'))
-    .text('Shewinvanakitkul', {
+    .fontSize(fontSizeForString(attendee['Last Name']))
+    .text(attendee['Last Name'], {
       align: 'left',
       ellipsis: true,
       height: 10,
@@ -57,7 +57,7 @@ function renderBadge(x, y) {
       width: (badgeWidth * pdfDPI) - 20,
     })
     .fontSize(20)
-    .text('Photography', x, y + 121, {
+    .text(attendee.TEAM, x, y + 121, {
       align: 'center',
       ellipsis: true,
       height: 10,
@@ -67,4 +67,22 @@ function renderBadge(x, y) {
     .image('givecamp-logo.png', x + (badgeWidth * pdfDPI) - 70, y + 10, {
       width: 60,
     });
+}
+
+function renderPage(attendees) {
+  doc.addPage();
+
+  const attendeesByRow = chunk(attendees, badgesPerRow);
+
+  for (let i = 0; i < badgeRowsPerPage; i++) {
+    const badgeY = extraPageVerticalMargin + (i * badgeHeight * pdfDPI);
+
+    doc.rect(extraPageHorizontalMargin, badgeY + (badgeHeight * pdfDPI) - barHeight, pdfWidth - (extraPageHorizontalMargin * 2), barHeight)
+      .fill('#6fb055');
+
+    if (attendeesByRow[i]) {
+      renderBadge(extraPageHorizontalMargin, badgeY, attendeesByRow[i][0]);
+      renderBadge(extraPageHorizontalMargin + (badgeWidth * pdfDPI), badgeY, attendeesByRow[i][1]);
+    }
+  }
 }
