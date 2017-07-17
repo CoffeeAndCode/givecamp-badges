@@ -22,7 +22,14 @@ const extraPageVerticalMargin = (paperHeight - (badgeHeight * badgeRowsPerPage))
 const doc = new PDFDocument({ autoFirstPage: false });
 doc.pipe(fs.createWriteStream('badges.pdf'));
 
-const attendeesByPage = chunk(parse(fs.readFileSync('data.csv', 'utf8'), { columns: true }), badgeRowsPerPage * badgesPerRow);
+const attendees = parse(fs.readFileSync('data.csv', 'utf8'), { columns: true });
+const blankBadges = (new Array(20)).fill({
+  'TEAM': '',
+  'First Name': '',
+  'Last Name': '',
+});
+
+const attendeesByPage = chunk(attendees.concat(blankBadges), badgeRowsPerPage * badgesPerRow);
 
 attendeesByPage.forEach((attendees) => {
   renderPage(attendees);
@@ -31,31 +38,38 @@ attendeesByPage.forEach((attendees) => {
 doc.end();
 
 function fontSizeForString(string) {
-  if (string.length > 12) { return 20; }
-  if (string.length > 9) { return 23; }
+  if (string.length > 12) { return 18; }
+  if (string.length > 9) { return 20; }
   return 25;
 }
 
 function renderBadge(x, y, attendee) {
+  doc.image('givecamp-logo.png', x + (badgeWidth * pdfDPI) - 70, y + 10, {
+      width: 60,
+    });
+
   if (!attendee) { return; }
 
   doc.fillColor('black')
+    .font('Helvetica-Bold')
     .fontSize(fontSizeForString(attendee['First Name']))
-    .text(attendee['First Name'], x + 10, y + 35, {
+    .text(attendee['First Name'].toUpperCase(), x + 10, y + 35, {
       align: 'left',
       ellipsis: true,
       height: 10,
       indent: 0,
       width: (badgeWidth * pdfDPI) - 20,
     })
+    .font('Helvetica-Bold')
     .fontSize(fontSizeForString(attendee['Last Name']))
-    .text(attendee['Last Name'], {
+    .text(attendee['Last Name'].toUpperCase(), {
       align: 'left',
       ellipsis: true,
       height: 10,
       indent: 0,
       width: (badgeWidth * pdfDPI) - 20,
     })
+    .font('Helvetica')
     .fontSize(20)
     .text(attendee.TEAM, x, y + 121, {
       align: 'center',
@@ -63,9 +77,6 @@ function renderBadge(x, y, attendee) {
       height: 10,
       indent: 0,
       width: (badgeWidth * pdfDPI) - 10,
-    })
-    .image('givecamp-logo.png', x + (badgeWidth * pdfDPI) - 70, y + 10, {
-      width: 60,
     });
 }
 
