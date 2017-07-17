@@ -1,0 +1,16 @@
+{
+  "name": "givecamp-badges",
+  "version": "0.0.1",
+  "private": true,
+  "author": {
+    "email": "info@coffeeandcode.com",
+    "name": "Coffee and Code",
+    "url": "http://www.coffeeandcode.com"
+  },
+  "dependencies": {
+    "pdfkit": "^0.8.3"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
