@@ -29,7 +29,7 @@ const blankBadges = (new Array(20)).fill({
   'Last Name': '',
 });
 
-const attendeesByPage = chunk(attendees.concat(blankBadges), badgeRowsPerPage * badgesPerRow);
+const attendeesByPage = chunk(attendees.concat(blankBadges), badgeRowsPerPage);
 
 attendeesByPage.forEach((attendees) => {
   renderPage(attendees);
@@ -83,17 +83,15 @@ function renderBadge(x, y, attendee) {
 function renderPage(attendees) {
   doc.addPage();
 
-  const attendeesByRow = chunk(attendees, badgesPerRow);
-
   for (let i = 0; i < badgeRowsPerPage; i++) {
     const badgeY = extraPageVerticalMargin + (i * badgeHeight * pdfDPI);
 
     doc.rect(extraPageHorizontalMargin, badgeY + (badgeHeight * pdfDPI) - barHeight, pdfWidth - (extraPageHorizontalMargin * 2), barHeight)
       .fill('#6fb055');
 
-    if (attendeesByRow[i]) {
-      renderBadge(extraPageHorizontalMargin, badgeY, attendeesByRow[i][0]);
-      renderBadge(extraPageHorizontalMargin + (badgeWidth * pdfDPI), badgeY, attendeesByRow[i][1]);
+    if (attendees[i]) {
+      renderBadge(extraPageHorizontalMargin, badgeY, attendees[i]);
+      renderBadge(extraPageHorizontalMargin + (badgeWidth * pdfDPI), badgeY, attendees[i]);
     }
   }
 }
