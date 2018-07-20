@@ -24,7 +24,7 @@ doc.pipe(fs.createWriteStream('badges.pdf'));
 
 const attendees = parse(fs.readFileSync('data.csv', 'utf8'), { columns: true });
 const blankBadges = (new Array(20)).fill({
-  'TEAM': '',
+  'Team': '',
   'First Name': '',
   'Last Name': '',
 });
@@ -71,7 +71,7 @@ function renderBadge(x, y, attendee) {
     })
     .font('Helvetica')
     .fontSize(20)
-    .text(attendee.TEAM, x, y + 121, {
+    .text(attendee.Team, x, y + 121, {
       align: 'center',
       ellipsis: true,
       height: 10,
