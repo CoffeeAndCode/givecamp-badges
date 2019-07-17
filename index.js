@@ -80,6 +80,7 @@ function renderBadge(x, y, attendee) {
     })
     .font("Helvetica")
     .fontSize(20)
+    .fillColor("white")
     .text(attendee.Team, x, y + 157, {
       align: "center",
       ellipsis: true,
@@ -102,7 +103,7 @@ function renderPage(attendees) {
         pdfWidth - extraPageHorizontalMargin * 2,
         barHeight
       )
-      .fill("#6fb055");
+      .fill("#00689d");
 
     if (attendees[i]) {
       renderBadge(extraPageHorizontalMargin, badgeY, attendees[i]);
