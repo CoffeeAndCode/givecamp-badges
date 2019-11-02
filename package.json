@@ -8,7 +8,7 @@
     "url": "http://www.coffeeandcode.com"
   },
   "dependencies": {
-    "csv-parse": "^1.2.0",
+    "csv-parse": "^4.4.6",
     "lodash.chunk": "^4.2.0",
     "pdfkit": "^0.8.3"
   },
